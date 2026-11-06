@@ -63,7 +63,7 @@
                 <key>script</key>
                 <string>open "blox://open"</string>
                 <key>scriptargtype</key>
-                <integer>1</integer>
+                <integer>0</integer>
                 <key>scriptfile</key>
                 <string></string>
                 <key>type</key>
