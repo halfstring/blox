@@ -2,7 +2,7 @@
 
 Blox is a lightweight macOS menu-bar canvas for sticky notes, checklists, and reminders.
 
-Click the menu-bar icon to open a resizable canvas. Drop in a sticky note, build a quick checklist, or set a reminder that turns the icon red until you mark it done. Everything is stored locally as JSON — no accounts, no network, no telemetry.
+Click the menu-bar icon to open a resizable canvas; right-click for Settings and Quit. Drop in a sticky note, build a quick checklist, or set a reminder that turns the icon red until you mark it done. Everything is stored locally as JSON — no accounts, no network, no telemetry.
 
 ## Features
 
@@ -15,8 +15,7 @@ Click the menu-bar icon to open a resizable canvas. Drop in a sticky note, build
 - **Room-to-breathe canvas** — a scrollable canvas with a faint dot grid. New cards are placed in free space instead of stacking on top of each other; drag a card by its grip to move it anywhere, or delete it from its context menu.
 - **Resizable window** — drag the handle in the bottom-right corner. The window stays horizontally centered, stays pinned to the top of the screen, remembers its size between launches, and the canvas grows with it.
 - **Local-first storage** — plain JSON on disk, with atomic writes and automatic backup of corrupted files.
-
-The interface is currently written in Chinese.
+- **Settings** — right-click the menu-bar icon for Settings and Quit. Pick the interface language (English or 简体中文) on the General tab; a hotkey setting is reserved for a future release. The About tab shows the version, license, and repository link.
 
 ## Requirements
 
