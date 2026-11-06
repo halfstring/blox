@@ -4,6 +4,8 @@ Blox is a lightweight macOS menu-bar canvas for sticky notes, checklists, and re
 
 Click the menu-bar icon to open a resizable canvas; right-click for Settings and Quit. Drop in a sticky note, build a quick checklist, or set a reminder that turns the icon red until you mark it done. Everything is stored locally as JSON — no accounts, no network, no telemetry.
 
+![Blox canvas](docs/blox.png)
+
 ## Features
 
 - **Menu-bar first** — no Dock icon. Click to open or close; press and drag down from the icon to unroll the canvas.
