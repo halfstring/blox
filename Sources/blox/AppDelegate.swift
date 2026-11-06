@@ -14,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     private var panel: CanvasPanel?
     private var settings: AppSettings?
     private var settingsWindow: SettingsWindowController?
+    private var pendingOpen = false
     private var iconWindow: NSWindow?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -104,6 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             Trace.log("icon rect later=\(self.itemFrame())")
         }
         Trace.log("launched")
+        openPendingCanvas()
     }
 
     private func logStateChanges() {
@@ -269,6 +271,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             return
         }
         toggleByState()
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard urls.contains(where: { $0.scheme == "blox" }) else { return }
+        pendingOpen = true
+        openPendingCanvas()
+    }
+
+    private func openPendingCanvas() {
+        guard pendingOpen, let panel else { return }
+        pendingOpen = false
+        var anchor = itemFrame()
+        if anchor.minY < 100 {
+            let screen = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+            anchor = NSRect(x: screen.midX - 12, y: screen.maxY - 30, width: 24, height: 30)
+        }
+        panel.openFull(anchor: anchor)
     }
 
     private func showStatusMenu() {

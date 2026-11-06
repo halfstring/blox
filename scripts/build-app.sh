@@ -29,6 +29,16 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key><string>dev.blox.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>blox</string>
+            </array>
+        </dict>
+    </array>
     <key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
