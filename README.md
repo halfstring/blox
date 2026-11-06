@@ -1,3 +1,5 @@
+English | [简体中文](README.zh-CN.md)
+
 # Blox
 
 Blox is a lightweight macOS menu-bar canvas for sticky notes, checklists, and reminders.
