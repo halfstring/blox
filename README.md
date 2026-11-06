@@ -28,7 +28,7 @@ Click the menu-bar icon to open a resizable canvas; right-click for Settings and
 
 ## Install
 
-Download `Blox-1.0.0.dmg` from Releases, open it, and drag **Blox** into Applications.
+Download `Blox-1.0.1.dmg` from Releases, open it, and drag **Blox** into Applications.
 
 Blox is ad-hoc signed and not notarized. On first launch macOS may refuse to open it; right-click the app and choose **Open**, or run:
 
