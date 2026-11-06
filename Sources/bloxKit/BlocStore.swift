@@ -45,7 +45,7 @@ public final class BlocStore: ObservableObject {
             id: UUID(),
             x: point.x,
             y: point.y,
-            height: BlockLayout.cardSpan.height,
+            height: BlockLayout.cardWidth / 2,
             kind: .sticky(StickyContent(text: ""))
         )
         append(block)
