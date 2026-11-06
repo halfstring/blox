@@ -146,7 +146,7 @@ struct PaletteBar: View {
                 RoundedRectangle(cornerRadius: 1.5, style: .continuous)
                     .fill(Chrome.accent)
                     .frame(width: 3, height: 10)
-                Text("blox")
+                Text("Blox")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Chrome.muted)
             }
