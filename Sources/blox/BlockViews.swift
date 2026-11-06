@@ -14,6 +14,8 @@ struct BlockCard: View {
     @ObservedObject var store: BlocStore
     @EnvironmentObject private var settings: AppSettings
     let block: Block
+    let isActive: Bool
+    let onActivate: () -> Void
     @State private var translation = CGSize.zero
     @State private var hovered = false
     @State private var resizePreview: CGSize?
@@ -49,7 +51,17 @@ struct BlockCard: View {
             }
         }
         .offset(translation)
-        .zIndex(translation == .zero ? (resizePreview == nil ? 0 : 9) : 8)
+        .zIndex(zIndex)
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded { onActivate() }
+        )
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isActive { onActivate() }
+                }
+        )
         .environment(\.colorScheme, .light)
         .onHover { hovered = $0 }
         .contextMenu {
@@ -88,7 +100,10 @@ struct BlockCard: View {
 
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 4, coordinateSpace: .global)
-            .onChanged { translation = $0.translation }
+            .onChanged { value in
+                if !isActive { onActivate() }
+                translation = value.translation
+            }
             .onEnded { value in
                 let x = max(BlockLayout.minBlockX, block.x + value.translation.width)
                 let y = max(BlockLayout.minBlockY, block.y + value.translation.height)
@@ -113,6 +128,12 @@ struct BlockCard: View {
                 Color(red: 0.874, green: 0.855, blue: 0.827)
             }
         }
+    }
+
+    private var zIndex: Double {
+        if isActive { return 10 }
+        if resizePreview != nil { return 9 }
+        return translation == .zero ? 0 : 8
     }
 
     private var resizeHandle: some View {
@@ -140,6 +161,7 @@ struct BlockCard: View {
     private var resizeGesture: some Gesture {
         DragGesture(minimumDistance: 2)
             .onChanged { value in
+                if !isActive { onActivate() }
                 if resizeOrigin == nil {
                     let baseHeight = fixedHeight ?? (measuredSize.height > 1 ? measuredSize.height : 200)
                     resizeOrigin = CGSize(width: displayWidth, height: baseHeight)

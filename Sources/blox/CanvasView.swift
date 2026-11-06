@@ -17,6 +17,7 @@ struct CanvasScreen: View {
     var onResize: (CGSize) -> Void
     var onResizeEnded: () -> Void
     @EnvironmentObject private var settings: AppSettings
+    @State private var activeBlockID: UUID?
     @State private var resizeHover = false
     @State private var resizeStartPoint: CGPoint?
 
@@ -39,8 +40,13 @@ struct CanvasScreen: View {
                         .frame(width: content.width, height: content.height)
                     CanvasTexture(size: content)
                     ForEach(store.blocks) { block in
-                        BlockCard(store: store, block: block)
-                            .position(x: block.x, y: block.y)
+                        BlockCard(
+                            store: store,
+                            block: block,
+                            isActive: activeBlockID == block.id,
+                            onActivate: { activeBlockID = block.id }
+                        )
+                        .position(x: block.x, y: block.y)
                     }
                 }
             }
