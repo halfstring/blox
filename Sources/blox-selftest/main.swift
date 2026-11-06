@@ -47,7 +47,8 @@ private func run() {
         ("completeAndMove", completeAndMove),
         ("placementEmptySpace", placementEmptySpace),
         ("windowSizePersists", windowSizePersists),
-        ("cardResize", cardResize)
+        ("cardResize", cardResize),
+        ("newStickySize", newStickySize)
     ]
     for (name, test) in cases {
         do {
@@ -233,4 +234,14 @@ private func cardResize() throws {
     check(reloaded.block(with: block.id)?.width == 280, "卡片尺寸持久化")
     reloaded.resize(id: block.id, to: CGSize(width: 10, height: 10))
     check(reloaded.block(with: block.id)?.width == BlockLayout.minCardWidth, "卡片尺寸不小于下限")
+}
+
+@MainActor
+private func newStickySize() throws {
+    let dir = try tempDir()
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let store = BlocStore(storageURL: dir.appendingPathComponent("blocks.json"))
+    let block = store.addSticky()
+    check(block.height == BlockLayout.cardSpan.height, "新建标签默认比例")
+    check(store.block(with: block.id)?.height == BlockLayout.cardSpan.height, "新建标签比例已保存")
 }

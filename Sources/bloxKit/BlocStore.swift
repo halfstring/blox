@@ -41,7 +41,13 @@ public final class BlocStore: ObservableObject {
     @discardableResult
     public func addSticky() -> Block {
         let point = placement()
-        let block = Block(id: UUID(), x: point.x, y: point.y, kind: .sticky(StickyContent(text: "")))
+        let block = Block(
+            id: UUID(),
+            x: point.x,
+            y: point.y,
+            height: BlockLayout.cardSpan.height,
+            kind: .sticky(StickyContent(text: ""))
+        )
         append(block)
         return block
     }
