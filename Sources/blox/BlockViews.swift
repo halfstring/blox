@@ -21,16 +21,15 @@ struct BlockCard: View {
     @State private var resizePreview: CGSize?
     @State private var resizeOrigin: CGSize?
     @State private var resizeHover = false
-    @State private var measuredSize = CGSize.zero
 
-    private var displayWidth: CGFloat { resizePreview?.width ?? block.width ?? BlockLayout.cardWidth }
-    private var fixedHeight: CGFloat? { resizePreview?.height ?? block.height }
+    private var displayWidth: CGFloat { resizePreview?.width ?? block.width ?? BlockLayout.newCardSize.width }
+    private var fixedHeight: CGFloat { resizePreview?.height ?? block.height ?? BlockLayout.newCardSize.height }
 
     var body: some View {
         VStack(spacing: 0) {
             grip
             content
-                .frame(maxWidth: .infinity, maxHeight: fixedHeight == nil ? nil : .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(width: displayWidth)
         .frame(height: fixedHeight)
@@ -42,13 +41,6 @@ struct BlockCard: View {
         .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
         .overlay(alignment: .bottomTrailing) {
             resizeHandle
-        }
-        .background {
-            GeometryReader { proxy in
-                Color.clear
-                    .onAppear { measuredSize = proxy.size }
-                    .onChange(of: proxy.size) { _, size in measuredSize = size }
-            }
         }
         .offset(translation)
         .zIndex(zIndex)
@@ -163,8 +155,7 @@ struct BlockCard: View {
             .onChanged { value in
                 if !isActive { onActivate() }
                 if resizeOrigin == nil {
-                    let baseHeight = fixedHeight ?? (measuredSize.height > 1 ? measuredSize.height : 200)
-                    resizeOrigin = CGSize(width: displayWidth, height: baseHeight)
+                    resizeOrigin = CGSize(width: displayWidth, height: fixedHeight)
                 }
                 guard let base = resizeOrigin else { return }
                 resizePreview = CGSize(
@@ -185,21 +176,13 @@ struct BlockCard: View {
     private var content: some View {
         switch block.kind {
         case .sticky:
-            StickyBody(store: store, blockID: block.id, flexible: fixedHeight != nil)
+            StickyBody(store: store, blockID: block.id)
         case .list:
-            if fixedHeight == nil {
-                ListBody(store: store, blockID: block.id)
-            } else {
-                ScrollView { ListBody(store: store, blockID: block.id) }
-                    .scrollIndicators(.hidden)
-            }
+            ScrollView { ListBody(store: store, blockID: block.id) }
+                .scrollIndicators(.hidden)
         case .reminder:
-            if fixedHeight == nil {
-                ReminderBody(store: store, blockID: block.id)
-            } else {
-                ScrollView { ReminderBody(store: store, blockID: block.id) }
-                    .scrollIndicators(.hidden)
-            }
+            ScrollView { ReminderBody(store: store, blockID: block.id) }
+                .scrollIndicators(.hidden)
         }
     }
 }
@@ -207,20 +190,12 @@ struct BlockCard: View {
 struct StickyBody: View {
     @ObservedObject var store: BlocStore
     let blockID: UUID
-    let flexible: Bool
 
     var body: some View {
-        Group {
-            if flexible {
-                ScrollView {
-                    field
-                }
-                .scrollIndicators(.hidden)
-            } else {
-                field
-            }
+        ScrollView {
+            field
         }
-        .frame(minHeight: flexible ? 0 : 132)
+        .scrollIndicators(.hidden)
         .padding(.bottom, 20)
     }
 

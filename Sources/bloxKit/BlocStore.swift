@@ -24,8 +24,8 @@ public final class BlocStore: ObservableObject {
     }
 
     public var contentExtent: CGSize {
-        let maxX = blocks.map { $0.x + ($0.width ?? BlockLayout.cardWidth) }.max() ?? 0
-        let maxY = blocks.map { $0.y + ($0.height ?? BlockLayout.cardSpan.height) }.max() ?? 0
+        let maxX = blocks.map { $0.x + ($0.width ?? BlockLayout.newCardSize.width) / 2 + 12 }.max() ?? 0
+        let maxY = blocks.map { $0.y + ($0.height ?? BlockLayout.newCardSize.height) / 2 + 12 }.max() ?? 0
         return CGSize(width: maxX, height: maxY)
     }
 
@@ -45,7 +45,8 @@ public final class BlocStore: ObservableObject {
             id: UUID(),
             x: point.x,
             y: point.y,
-            height: BlockLayout.cardWidth / 2,
+            width: BlockLayout.newCardSize.width,
+            height: BlockLayout.newCardSize.height,
             kind: .sticky(StickyContent(text: ""))
         )
         append(block)
@@ -55,7 +56,14 @@ public final class BlocStore: ObservableObject {
     @discardableResult
     public func addList() -> Block {
         let point = placement()
-        let block = Block(id: UUID(), x: point.x, y: point.y, kind: .list(ListContent(title: "", items: [])))
+        let block = Block(
+            id: UUID(),
+            x: point.x,
+            y: point.y,
+            width: BlockLayout.newCardSize.width,
+            height: BlockLayout.newCardSize.height,
+            kind: .list(ListContent(title: "", items: []))
+        )
         append(block)
         return block
     }
@@ -64,7 +72,14 @@ public final class BlocStore: ObservableObject {
     public func addReminder(text: String = "", due: Date? = nil) -> Block {
         let dueAt = due ?? clock().addingTimeInterval(600)
         let point = placement()
-        let block = Block(id: UUID(), x: point.x, y: point.y, kind: .reminder(ReminderContent(text: clampReminderText(text), due: dueAt, state: .pending)))
+        let block = Block(
+            id: UUID(),
+            x: point.x,
+            y: point.y,
+            width: BlockLayout.newCardSize.width,
+            height: BlockLayout.newCardSize.height,
+            kind: .reminder(ReminderContent(text: clampReminderText(text), due: dueAt, state: .pending))
+        )
         append(block)
         return block
     }
@@ -195,11 +210,11 @@ public final class BlocStore: ObservableObject {
     }
 
     private func placement() -> CGPoint {
-        let span = BlockLayout.cardSpan
+        let span = BlockLayout.newCardSize
         let gap: CGFloat = 16
         let stepX = span.width + gap
         let stepY = span.height + gap
-        let originX = BlockLayout.minBlockX
+        let originX = max(BlockLayout.minBlockX, span.width / 2 + 12)
         let originY = max(BlockLayout.minBlockY, span.height / 2 + 12)
         let extent = contentExtent
         let canvas = CGSize(

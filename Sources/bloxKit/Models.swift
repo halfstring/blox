@@ -104,6 +104,7 @@ public enum BlockLayout {
     public static let canvasViewport = CGSize(width: panelWidth, height: panelHeight - paletteHeight)
     public static let cardWidth: CGFloat = 208
     public static let cardSpan = CGSize(width: 220, height: 240)
+    public static let newCardSize = CGSize(width: cardWidth * 3, height: cardWidth * 3 / 2)
     public static let minCardWidth: CGFloat = 160
     public static let minCardHeight: CGFloat = 120
     public static let minBlockX: CGFloat = 120

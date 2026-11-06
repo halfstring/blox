@@ -242,6 +242,6 @@ private func newStickySize() throws {
     defer { try? FileManager.default.removeItem(at: dir) }
     let store = BlocStore(storageURL: dir.appendingPathComponent("blocks.json"))
     let block = store.addSticky()
-    check(block.height == BlockLayout.cardWidth / 2, "新建标签默认比例")
-    check(store.block(with: block.id)?.height == BlockLayout.cardWidth / 2, "新建标签比例已保存")
+    check(block.width == BlockLayout.newCardSize.width && block.height == BlockLayout.newCardSize.height, "新建标签默认尺寸")
+    check(store.block(with: block.id)?.height == BlockLayout.newCardSize.height, "新建标签尺寸已保存")
 }
