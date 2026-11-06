@@ -16,21 +16,40 @@ struct BlockCard: View {
     let block: Block
     @State private var translation = CGSize.zero
     @State private var hovered = false
+    @State private var resizePreview: CGSize?
+    @State private var resizeOrigin: CGSize?
+    @State private var resizeHover = false
+    @State private var measuredSize = CGSize.zero
+
+    private var displayWidth: CGFloat { resizePreview?.width ?? block.width ?? BlockLayout.cardWidth }
+    private var fixedHeight: CGFloat? { resizePreview?.height ?? block.height }
 
     var body: some View {
         VStack(spacing: 0) {
             grip
             content
+                .frame(maxWidth: .infinity, maxHeight: fixedHeight == nil ? nil : .infinity)
         }
-        .frame(width: BlockLayout.cardWidth)
+        .frame(width: displayWidth)
+        .frame(height: fixedHeight)
         .background(bg, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(Paper.hairline, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+        .overlay(alignment: .bottomTrailing) {
+            resizeHandle
+        }
+        .background {
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear { measuredSize = proxy.size }
+                    .onChange(of: proxy.size) { _, size in measuredSize = size }
+            }
+        }
         .offset(translation)
-        .zIndex(translation == .zero ? 0 : 8)
+        .zIndex(translation == .zero ? (resizePreview == nil ? 0 : 9) : 8)
         .environment(\.colorScheme, .light)
         .onHover { hovered = $0 }
         .contextMenu {
@@ -96,15 +115,69 @@ struct BlockCard: View {
         }
     }
 
+    private var resizeHandle: some View {
+        Image(systemName: "arrow.up.left.and.arrow.down.right")
+            .font(.system(size: 8, weight: .medium))
+            .foregroundStyle(Paper.secondary.opacity(resizeHover ? 0.85 : 0.4))
+            .frame(width: 18, height: 18)
+            .contentShape(Rectangle())
+            .onHover { inside in
+                resizeHover = inside
+                if inside {
+                    if #available(macOS 15.0, *) {
+                        NSCursor.frameResize(position: .bottomRight, directions: .all).set()
+                    } else {
+                        NSCursor.resizeLeftRight.set()
+                    }
+                } else {
+                    NSCursor.arrow.set()
+                }
+            }
+            .highPriorityGesture(resizeGesture)
+            .padding(2)
+    }
+
+    private var resizeGesture: some Gesture {
+        DragGesture(minimumDistance: 2)
+            .onChanged { value in
+                if resizeOrigin == nil {
+                    let baseHeight = fixedHeight ?? (measuredSize.height > 1 ? measuredSize.height : 200)
+                    resizeOrigin = CGSize(width: displayWidth, height: baseHeight)
+                }
+                guard let base = resizeOrigin else { return }
+                resizePreview = CGSize(
+                    width: max(BlockLayout.minCardWidth, base.width + value.translation.width),
+                    height: max(BlockLayout.minCardHeight, base.height + value.translation.height)
+                )
+            }
+            .onEnded { _ in
+                if let preview = resizePreview {
+                    store.resize(id: block.id, to: preview)
+                }
+                resizeOrigin = nil
+                resizePreview = nil
+            }
+    }
+
     @ViewBuilder
     private var content: some View {
         switch block.kind {
         case .sticky:
-            StickyBody(store: store, blockID: block.id)
+            StickyBody(store: store, blockID: block.id, flexible: fixedHeight != nil)
         case .list:
-            ListBody(store: store, blockID: block.id)
+            if fixedHeight == nil {
+                ListBody(store: store, blockID: block.id)
+            } else {
+                ScrollView { ListBody(store: store, blockID: block.id) }
+                    .scrollIndicators(.hidden)
+            }
         case .reminder:
-            ReminderBody(store: store, blockID: block.id)
+            if fixedHeight == nil {
+                ReminderBody(store: store, blockID: block.id)
+            } else {
+                ScrollView { ReminderBody(store: store, blockID: block.id) }
+                    .scrollIndicators(.hidden)
+            }
         }
     }
 }
@@ -112,19 +185,35 @@ struct BlockCard: View {
 struct StickyBody: View {
     @ObservedObject var store: BlocStore
     let blockID: UUID
+    let flexible: Bool
 
     var body: some View {
-        TextEditor(text: Binding(
+        Group {
+            if flexible {
+                ScrollView {
+                    field
+                }
+                .scrollIndicators(.hidden)
+            } else {
+                field
+            }
+        }
+        .frame(minHeight: flexible ? 0 : 132)
+        .padding(.bottom, 20)
+    }
+
+    private var field: some View {
+        TextField("", text: Binding(
             get: { store.stickyText(id: blockID) },
             set: { store.setStickyText(id: blockID, $0) }
-        ))
+        ), axis: .vertical)
+        .textFieldStyle(.plain)
         .font(.system(size: 13))
         .foregroundStyle(Paper.ink)
         .tint(Paper.ink)
-        .scrollContentBackground(.hidden)
-        .frame(height: 132)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(.horizontal, 8)
-        .padding(.bottom, 12)
+        .padding(.top, 2)
     }
 }
 
@@ -163,7 +252,7 @@ struct ListBody: View {
             .padding(.top, 2)
         }
         .padding(.horizontal, 12)
-        .padding(.bottom, 12)
+        .padding(.bottom, 20)
     }
 }
 
@@ -274,7 +363,7 @@ struct ReminderBody: View {
             }
             .environment(\.locale, settings.language.locale)
             .padding(.horizontal, 12)
-            .padding(.bottom, 12)
+            .padding(.bottom, 20)
         }
     }
 

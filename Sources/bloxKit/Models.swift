@@ -56,12 +56,16 @@ public struct Block: Codable, Equatable, Identifiable {
     public let id: UUID
     public var x: CGFloat
     public var y: CGFloat
+    public var width: CGFloat?
+    public var height: CGFloat?
     public var kind: BlockKind
 
-    public init(id: UUID, x: CGFloat, y: CGFloat, kind: BlockKind) {
+    public init(id: UUID, x: CGFloat, y: CGFloat, width: CGFloat? = nil, height: CGFloat? = nil, kind: BlockKind) {
         self.id = id
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
         self.kind = kind
     }
 }
@@ -100,6 +104,8 @@ public enum BlockLayout {
     public static let canvasViewport = CGSize(width: panelWidth, height: panelHeight - paletteHeight)
     public static let cardWidth: CGFloat = 208
     public static let cardSpan = CGSize(width: 220, height: 240)
+    public static let minCardWidth: CGFloat = 160
+    public static let minCardHeight: CGFloat = 120
     public static let minBlockX: CGFloat = 120
     public static let minBlockY: CGFloat = 80
     public static let unrollThreshold: CGFloat = 130

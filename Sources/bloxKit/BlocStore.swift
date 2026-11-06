@@ -24,12 +24,9 @@ public final class BlocStore: ObservableObject {
     }
 
     public var contentExtent: CGSize {
-        let maxX = blocks.map(\.x).max() ?? 0
-        let maxY = blocks.map(\.y).max() ?? 0
-        return CGSize(
-            width: maxX + BlockLayout.cardSpan.width,
-            height: maxY + BlockLayout.cardSpan.height
-        )
+        let maxX = blocks.map { $0.x + ($0.width ?? BlockLayout.cardWidth) }.max() ?? 0
+        let maxY = blocks.map { $0.y + ($0.height ?? BlockLayout.cardSpan.height) }.max() ?? 0
+        return CGSize(width: maxX, height: maxY)
     }
 
     public func setViewport(_ size: CGSize) {
@@ -69,6 +66,13 @@ public final class BlocStore: ObservableObject {
     public func remove(id: UUID) {
         blocks.removeAll { $0.id == id }
         save()
+    }
+
+    public func resize(id: UUID, to size: CGSize) {
+        mutate(id: id) { block in
+            block.width = max(BlockLayout.minCardWidth, size.width)
+            block.height = max(BlockLayout.minCardHeight, size.height)
+        }
     }
 
     public func move(id: UUID, to point: CGPoint) {
@@ -214,11 +218,13 @@ public final class BlocStore: ObservableObject {
                     height: span.height
                 ).insetBy(dx: -gap / 2, dy: -gap / 2)
                 let blocked = blocks.contains { block in
+                    let width = block.width ?? span.width
+                    let height = block.height ?? span.height
                     let occupied = CGRect(
-                        x: block.x - span.width / 2,
-                        y: block.y - span.height / 2,
-                        width: span.width,
-                        height: span.height
+                        x: block.x - width / 2,
+                        y: block.y - height / 2,
+                        width: width,
+                        height: height
                     )
                     return candidate.intersects(occupied)
                 }

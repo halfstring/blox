@@ -46,7 +46,8 @@ private func run() {
         ("corruptBackup", corruptBackup),
         ("completeAndMove", completeAndMove),
         ("placementEmptySpace", placementEmptySpace),
-        ("windowSizePersists", windowSizePersists)
+        ("windowSizePersists", windowSizePersists),
+        ("cardResize", cardResize)
     ]
     for (name, test) in cases {
         do {
@@ -218,3 +219,18 @@ private func windowSizePersists() throws {
     check(Storage.loadWindowSize(from: url) == size, "窗口大小持久化")
 }
 
+
+@MainActor
+private func cardResize() throws {
+    let dir = try tempDir()
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let url = dir.appendingPathComponent("blocks.json")
+    let store = BlocStore(storageURL: url)
+    let block = store.addSticky()
+    store.resize(id: block.id, to: CGSize(width: 280, height: 240))
+    check(store.block(with: block.id)?.width == 280 && store.block(with: block.id)?.height == 240, "卡片可缩放")
+    let reloaded = BlocStore(storageURL: url)
+    check(reloaded.block(with: block.id)?.width == 280, "卡片尺寸持久化")
+    reloaded.resize(id: block.id, to: CGSize(width: 10, height: 10))
+    check(reloaded.block(with: block.id)?.width == BlockLayout.minCardWidth, "卡片尺寸不小于下限")
+}
