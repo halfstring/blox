@@ -195,7 +195,7 @@ private func placementEmptySpace() throws {
     defer { try? FileManager.default.removeItem(at: dir) }
     let store = BlocStore(storageURL: dir.appendingPathComponent("blocks.json"))
     for _ in 0..<6 { store.addSticky() }
-    let span = BlockLayout.cardSpan
+    let span = BlockLayout.newCardSize
     let rects = store.blocks.map { block in
         CGRect(x: block.x - span.width / 2, y: block.y - span.height / 2, width: span.width, height: span.height)
     }
