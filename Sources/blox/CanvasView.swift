@@ -16,6 +16,7 @@ struct CanvasScreen: View {
     @ObservedObject var store: BlocStore
     var onResize: (CGSize) -> Void
     var onResizeEnded: () -> Void
+    @EnvironmentObject private var settings: AppSettings
     @State private var resizeHover = false
     @State private var resizeStartPoint: CGPoint?
 
@@ -46,7 +47,7 @@ struct CanvasScreen: View {
             .defaultScrollAnchor(.center)
             .overlay {
                 if store.blocks.isEmpty {
-                    Text("在桌布上贴第一张贴纸")
+                    Text(settings.strings.emptyCanvas)
                         .font(.system(size: 13))
                         .foregroundStyle(Chrome.muted)
                         .allowsHitTesting(false)
@@ -87,7 +88,7 @@ struct CanvasScreen: View {
                     NSCursor.arrow.set()
                 }
             }
-            .help("拖拽调整窗口大小")
+            .help(settings.strings.resizeHelp)
             .highPriorityGesture(resizeGesture)
     }
 
@@ -136,6 +137,7 @@ struct CanvasTexture: View {
 
 struct PaletteBar: View {
     @ObservedObject var store: BlocStore
+    @EnvironmentObject private var settings: AppSettings
     @State private var hoveredChip: String?
 
     var body: some View {
@@ -149,9 +151,9 @@ struct PaletteBar: View {
                     .foregroundStyle(Chrome.muted)
             }
             .padding(.trailing, 4)
-            chip("标签贴", icon: "note.text") { store.addSticky() }
-            chip("列表事件", icon: "checklist") { store.addList() }
-            chip("提醒事件", icon: "bell.badge") { store.addReminder() }
+            chip(settings.strings.stickyChip, icon: "note.text") { store.addSticky() }
+            chip(settings.strings.listChip, icon: "checklist") { store.addList() }
+            chip(settings.strings.reminderChip, icon: "bell.badge") { store.addReminder() }
             Spacer()
         }
         .padding(.horizontal, 12)

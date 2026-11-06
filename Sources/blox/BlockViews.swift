@@ -12,6 +12,7 @@ enum Paper {
 
 struct BlockCard: View {
     @ObservedObject var store: BlocStore
+    @EnvironmentObject private var settings: AppSettings
     let block: Block
     @State private var translation = CGSize.zero
     @State private var hovered = false
@@ -36,7 +37,7 @@ struct BlockCard: View {
             Button(role: .destructive) {
                 store.remove(id: block.id)
             } label: {
-                Label("删除", systemImage: "trash")
+                Label(settings.strings.delete, systemImage: "trash")
             }
         }
     }
@@ -57,7 +58,7 @@ struct BlockCard: View {
                         .frame(width: 20, height: 20)
                 }
                 .buttonStyle(.plain)
-                .help("删除")
+                .help(settings.strings.delete)
             }
         }
         .padding(.horizontal, 12)
@@ -129,12 +130,13 @@ struct StickyBody: View {
 
 struct ListBody: View {
     @ObservedObject var store: BlocStore
+    @EnvironmentObject private var settings: AppSettings
     let blockID: UUID
     @State private var draft = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField("标题", text: Binding(
+            TextField(settings.strings.listTitle, text: Binding(
                 get: { store.listTitle(id: blockID) },
                 set: { store.setListTitle(id: blockID, $0) }
             ))
@@ -149,7 +151,7 @@ struct ListBody: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Paper.muted)
                     .frame(width: 16, height: 16)
-                TextField("新事项", text: $draft)
+                TextField(settings.strings.newItem, text: $draft)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
                     .foregroundStyle(Paper.ink)
@@ -167,6 +169,7 @@ struct ListBody: View {
 
 struct ListItemRow: View {
     @ObservedObject var store: BlocStore
+    @EnvironmentObject private var settings: AppSettings
     let blockID: UUID
     let item: ListItem
     @State private var hovered = false
@@ -182,7 +185,7 @@ struct ListItemRow: View {
                     .frame(width: 16, height: 16)
             }
             .buttonStyle(.plain)
-            Text(item.text.isEmpty ? "（空）" : item.text)
+            Text(item.text.isEmpty ? settings.strings.emptyItem : item.text)
                 .font(.system(size: 12))
                 .strikethrough(item.done)
                 .foregroundStyle(item.done ? Paper.muted : Paper.ink)
@@ -207,6 +210,7 @@ struct ListItemRow: View {
 
 struct ReminderBody: View {
     @ObservedObject var store: BlocStore
+    @EnvironmentObject private var settings: AppSettings
     let blockID: UUID
 
     var body: some View {
@@ -253,13 +257,13 @@ struct ReminderBody: View {
                     displayedComponents: [.date, .hourAndMinute]
                 )
                 .labelsHidden()
-                .environment(\.locale, Locale(identifier: "zh_CN"))
+                .environment(\.locale, settings.language.locale)
                 .disabled(content.state == .done)
                 if content.state == .fired {
                     Button {
                         store.completeReminder(id: blockID)
                     } label: {
-                        Text("标为完成")
+                        Text(settings.strings.markDone)
                             .font(.system(size: 11, weight: .medium))
                             .frame(maxWidth: .infinity)
                     }
@@ -268,7 +272,7 @@ struct ReminderBody: View {
                     .tint(Paper.alert)
                 }
             }
-            .environment(\.locale, Locale(identifier: "zh_CN"))
+            .environment(\.locale, settings.language.locale)
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
@@ -292,11 +296,11 @@ struct ReminderBody: View {
     private func statusTitle(_ content: ReminderContent) -> String {
         switch content.state {
         case .pending:
-            "提醒 " + content.due.formatted(date: .abbreviated, time: .shortened)
+            settings.strings.reminderPrefix + " " + content.due.formatted(date: .abbreviated, time: .shortened)
         case .fired:
-            "时间到"
+            settings.strings.due
         case .done:
-            "已完成"
+            settings.strings.done
         }
     }
 

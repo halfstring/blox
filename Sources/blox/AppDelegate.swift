@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
 
     private var statusItem: NSStatusItem?
     private var panel: CanvasPanel?
+    private var settings: AppSettings?
     private var iconWindow: NSWindow?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -33,10 +34,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         let store = BlocStore()
+        let settings = AppSettings()
+        self.settings = settings
         let sizeURL = Storage.windowSizeURL(beside: Storage.defaultURL())
         let savedSize = Storage.loadWindowSize(from: sizeURL)
             ?? CGSize(width: BlockLayout.panelWidth, height: BlockLayout.panelHeight)
-        let panel = CanvasPanel(store: store, initialSize: savedSize, sizeURL: sizeURL)
+        let panel = CanvasPanel(store: store, settings: settings, initialSize: savedSize, sizeURL: sizeURL)
         panel.releaseAction = { [weak self] in self?.onPanelReleased() }
         self.panel = panel
 
@@ -285,7 +288,7 @@ final class CanvasPanel: NSPanel {
     private let sizeURL: URL
     private var panelSize: CGSize
 
-    init(store: BlocStore, initialSize: CGSize, sizeURL: URL) {
+    init(store: BlocStore, settings: AppSettings, initialSize: CGSize, sizeURL: URL) {
         let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
         let clamped = CGSize(
             width: min(max(BlockLayout.minWindowWidth, initialSize.width), screen.width - 16),
@@ -318,6 +321,7 @@ final class CanvasPanel: NSPanel {
             onResize: { [weak self] translation in self?.interactiveResize(translation: translation) },
             onResizeEnded: { [weak self] in self?.endInteractiveResize() }
         )
+        .environmentObject(settings)
         let hosting = NSHostingView(rootView: root)
         hosting.frame = container.bounds
         hosting.autoresizingMask = [.width, .height]
