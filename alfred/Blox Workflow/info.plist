@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>bundleid</key>
+    <string>com.halfstring.blox.launcher</string>
+    <key>category</key>
+    <string>Productivity</string>
+    <key>connections</key>
+    <dict>
+        <key>7B1D4A8E-4C1F-4F3A-9A2B-0F8C1D2E3A41</key>
+        <array>
+            <dict>
+                <key>destinationuid</key>
+                <string>9E2C5B7F-2A64-4C0D-8F11-6B3A7D9C4E52</string>
+                <key>modifiers</key>
+                <integer>0</integer>
+                <key>modifiersubtext</key>
+                <string></string>
+                <key>vitoclose</key>
+                <false/>
+            </dict>
+        </array>
+    </dict>
+    <key>createdby</key>
+    <string>halfstring</string>
+    <key>description</key>
+    <string>Open the Blox canvas with the keyword b</string>
+    <key>disabled</key>
+    <false/>
+    <key>name</key>
+    <string>Blox</string>
+    <key>objects</key>
+    <array>
+        <dict>
+            <key>config</key>
+            <dict>
+                <key>argumenttype</key>
+                <integer>0</integer>
+                <key>keyword</key>
+                <string>b</string>
+                <key>subtext</key>
+                <string>Open the Blox canvas</string>
+                <key>text</key>
+                <string>Open Blox</string>
+                <key>withspace</key>
+                <false/>
+            </dict>
+            <key>type</key>
+            <string>alfred.workflow.input.keyword</string>
+            <key>uid</key>
+            <string>7B1D4A8E-4C1F-4F3A-9A2B-0F8C1D2E3A41</string>
+            <key>version</key>
+            <integer>1</integer>
+        </dict>
+        <dict>
+            <key>config</key>
+            <dict>
+                <key>concurrently</key>
+                <false/>
+                <key>escaping</key>
+                <integer>102</integer>
+                <key>script</key>
+                <string>open "blox://open"</string>
+                <key>scriptargtype</key>
+                <integer>1</integer>
+                <key>scriptfile</key>
+                <string></string>
+                <key>type</key>
+                <integer>0</integer>
+            </dict>
+            <key>type</key>
+            <string>alfred.workflow.action.script</string>
+            <key>uid</key>
+            <string>9E2C5B7F-2A64-4C0D-8F11-6B3A7D9C4E52</string>
+            <key>version</key>
+            <integer>2</integer>
+        </dict>
+    </array>
+    <key>readme</key>
+    <string>Type b in Alfred and press Return to open the Blox canvas.</string>
+    <key>uid</key>
+    <string>3F6A9C2D-8E41-4B7A-A1C3-5D2E8F4B6C93</string>
+    <key>version</key>
+    <string>1.0</string>
+    <key>webaddress</key>
+    <string>https://github.com/halfstring/blox</string>
+</dict>
+</plist>

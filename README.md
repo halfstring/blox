@@ -36,6 +36,10 @@ Blox is ad-hoc signed and not notarized. On first launch macOS may refuse to ope
 xattr -dr com.apple.quarantine /Applications/Blox.app
 ```
 
+### Alfred
+
+Double-click `alfred/Blox.alfredworkflow` to install the workflow, then type `b` and press Return to open the canvas.
+
 ## Build and run
 
 Run from source:
