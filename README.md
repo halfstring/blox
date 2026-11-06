@@ -23,6 +23,16 @@ The interface is currently written in Chinese.
 - macOS 14 or later
 - Swift 6 toolchain (Xcode or Command Line Tools)
 
+## Install
+
+Download `Blox-1.0.0.dmg` from Releases, open it, and drag **Blox** into Applications.
+
+Blox is ad-hoc signed and not notarized. On first launch macOS may refuse to open it; right-click the app and choose **Open**, or run:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Blox.app
+```
+
 ## Build and run
 
 Run from source:
@@ -73,4 +83,4 @@ The canvas model (`Block`, `BlockKind`) is `Codable`, so cards are forward-compa
 
 ## License
 
-No license has been chosen yet.
+MIT © halfstring
