@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     private var statusItem: NSStatusItem?
     private var panel: CanvasPanel?
     private var settings: AppSettings?
+    private var settingsWindow: SettingsWindowController?
     private var iconWindow: NSWindow?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -36,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         let store = BlocStore()
         let settings = AppSettings()
         self.settings = settings
+        settingsWindow = SettingsWindowController(settings: settings)
         let sizeURL = Storage.windowSizeURL(beside: Storage.defaultURL())
         let savedSize = Storage.loadWindowSize(from: sizeURL)
             ?? CGSize(width: BlockLayout.panelWidth, height: BlockLayout.panelHeight)
@@ -51,6 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         item.button?.image = logo
         Trace.log("logo=\(logo.map { "\(Int($0.size.width))x\(Int($0.size.height))" } ?? "nil") template=\(logo?.isTemplate ?? false)")
         item.button?.target = self
+        item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.button?.action = #selector(statusAction)
         statusItem = item
         iconWindow = item.button?.window
@@ -252,6 +255,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     }
 
     @objc private func statusAction() {
+        if let event = NSApp.currentEvent, event.type == .rightMouseUp {
+            showStatusMenu()
+            return
+        }
         Trace.log("statusAction visible=\(panel?.isVisible ?? false) suppress=\(suppressClick) press=\(pressActive)")
         if suppressClick {
             suppressClick = false
@@ -262,6 +269,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             return
         }
         toggleByState()
+    }
+
+    private func showStatusMenu() {
+        guard let button = statusItem?.button else { return }
+        let strings = settings?.strings ?? Strings(language: .english)
+        let menu = NSMenu()
+        let settingsItem = NSMenuItem(title: strings.settingsMenu, action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        menu.addItem(.separator())
+        let quitItem = NSMenuItem(title: strings.quitApp, action: #selector(quitApplication), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+        Trace.log("status menu")
+        statusItem?.menu = menu
+        button.performClick(nil)
+        statusItem?.menu = nil
+    }
+
+    @objc private func openSettings() {
+        panel?.closeNow()
+        settingsWindow?.show()
+    }
+
+    @objc private func quitApplication() {
+        NSApp.terminate(nil)
     }
 
     private func toggleByState() {

@@ -1,4 +1,5 @@
-import Foundation
+import AppKit
+import SwiftUI
 import Combine
 
 enum AppLanguage: String, CaseIterable, Identifiable {
@@ -68,4 +69,111 @@ final class AppSettings: ObservableObject {
     }
 
     var strings: Strings { Strings(language: language) }
+}
+
+struct SettingsView: View {
+    @EnvironmentObject private var settings: AppSettings
+
+    var body: some View {
+        TabView {
+            GeneralSettingsView()
+                .tabItem { Text(settings.strings.generalTab) }
+            AboutSettingsView()
+                .tabItem { Text(settings.strings.aboutTab) }
+        }
+        .frame(width: 420, height: 300)
+    }
+}
+
+struct GeneralSettingsView: View {
+    @EnvironmentObject private var settings: AppSettings
+
+    var body: some View {
+        let s = settings.strings
+        Form {
+            Picker(s.languageLabel, selection: $settings.language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.displayName).tag(language)
+                }
+            }
+            .pickerStyle(.radioGroup)
+            HStack {
+                Text(s.hotkeyLabel)
+                Spacer()
+                Text(s.comingSoon)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+        .padding(.vertical, 8)
+    }
+}
+
+struct AboutSettingsView: View {
+    @EnvironmentObject private var settings: AppSettings
+
+    private var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+    }
+
+    var body: some View {
+        let s = settings.strings
+        VStack(spacing: 10) {
+            if let url = Bundle.module.url(forResource: "blox-logo", withExtension: "png"),
+               let image = NSImage(contentsOf: url) {
+                Image(nsImage: image)
+                    .resizable()
+                    .frame(width: 56, height: 56)
+            }
+            Text("Blox")
+                .font(.system(size: 18, weight: .semibold))
+            Text(s.aboutTagline)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 320)
+            Text("\(s.versionLabel) \(version)")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+            Link("github.com/halfstring/blox", destination: URL(string: "https://github.com/halfstring/blox")!)
+                .font(.system(size: 11))
+            Text("MIT © 2026 halfstring")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+@MainActor
+final class SettingsWindowController {
+    private let settings: AppSettings
+    private var window: NSWindow?
+    private var cancellable: AnyCancellable?
+
+    init(settings: AppSettings) {
+        self.settings = settings
+        cancellable = settings.$language.sink { [weak self] language in
+            self?.window?.title = Strings(language: language).settingsTitle
+        }
+    }
+
+    func show() {
+        if window == nil {
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 300),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = settings.strings.settingsTitle
+            window.contentView = NSHostingView(rootView: SettingsView().environmentObject(settings))
+            window.isReleasedWhenClosed = false
+            window.center()
+            self.window = window
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+    }
 }
