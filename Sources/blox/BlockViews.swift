@@ -192,25 +192,16 @@ struct StickyBody: View {
     let blockID: UUID
 
     var body: some View {
-        ScrollView {
-            field
-        }
-        .scrollIndicators(.hidden)
-        .padding(.bottom, 20)
-    }
-
-    private var field: some View {
-        TextField("", text: Binding(
+        TextEditor(text: Binding(
             get: { store.stickyText(id: blockID) },
             set: { store.setStickyText(id: blockID, $0) }
-        ), axis: .vertical)
-        .textFieldStyle(.plain)
+        ))
         .font(.system(size: 13))
         .foregroundStyle(Paper.ink)
         .tint(Paper.ink)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .padding(.horizontal, 8)
-        .padding(.top, 2)
+        .scrollContentBackground(.hidden)
+        .padding(.horizontal, 3)
+        .padding(.bottom, 20)
     }
 }
 
